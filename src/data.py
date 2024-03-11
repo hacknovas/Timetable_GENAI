@@ -1,68 +1,111 @@
 from domain import (
-  Class,
-  Course,
-  Department,
-  Instructor,
-  MeetingTime,
-  Room
+    Class,
+    Course,
+    Department,
+    Instructor,
+    MeetingTime,
+    Room,
 )
 
+
 class Data(object):
-  def __init__(self):
-    self.rooms = None
-    self.instructors = None
-    self.courses = None
-    self.depts = None
-    self.meeting_times = None
-    self.number_of_classes = None
+    def __init__(self):
+        self.rooms = None
+        self.instructors = None
+        self.courses = None
+        self.depts = None
+        self.meeting_times = []  # List to store MeetingTime objects
+        self.meeting_time_ids = []  # List to store meeting time IDs (optional)
 
-    self.initialize()
-  
-  def initialize(self):
-    # create rooms
-    room1 = Room(number="R1", seating_capacity=25)
-    room2 = Room(number="R2", seating_capacity=45)
-    room3 = Room(number="R3", seating_capacity=35)
-    self.rooms = [room1, room2, room3]
+        self.initialize_from_user_input()
 
-    # create meeting times
-    meeting_time1 = MeetingTime(id="MT1", time="MWF 09:00 - 10:00")
-    meeting_time2 = MeetingTime(id="MT2", time="MWF 10:00 - 11:00")
-    meeting_time3 = MeetingTime(id="MT3", time="TTH 09:00 - 10:00")
-    meeting_time4 = MeetingTime(id="MT4", time="TTH 10:00 - 11:00")
+    def initialize_from_user_input(self):
+        # Get room information
+        self.get_room_data()
 
-    self.meeting_times = [
-      meeting_time1, 
-      meeting_time2, 
-      meeting_time3, 
-      meeting_time4
-    ]
+        # Get instructor information
+        self.get_instructor_data()
 
-    # creating instructors
-    instructor1 = Instructor(id="I1", name="ALGO teacher")
-    instructor2 = Instructor(id="I2", name="IS teacher")
-    instructor3 = Instructor(id="I3", name="DBMS teacher")
-    instructor4 = Instructor(id="I4", name="CI teacher")
+        # Get course information
+        self.get_course_data()
 
-    self.instructors = [instructor1, instructor2, instructor3, instructor4]
+        # Get department information
+        self.get_department_data()
 
-    # create courses
-    course1 = Course(number="C1", name="ALGO", max_number_of_students=25, instructors=[instructor1, instructor2])
-    course2 = Course(number="C2", name="IS", max_number_of_students=35, instructors=[instructor1, instructor2, instructor3])
-    course3 = Course(number="C3", name="DBMS", max_number_of_students=25, instructors=[instructor1, instructor2])
-    course4 = Course(number="C4", name="CI", max_number_of_students=30, instructors=[instructor3, instructor4])
-    course5 = Course(number="C5", name="AI", max_number_of_students=35, instructors=[instructor4])
-    course6 = Course(number="C6", name="DATA_MINING", max_number_of_students=45, instructors=[instructor1, instructor3])
-    course7 = Course(number="C7", name="NETWORKS", max_number_of_students=45, instructors=[instructor2, instructor4])
+        # Get meeting time information
+        self.get_meeting_time_data()
 
-    self.courses = [course1, course2, course3, course4, course5, course6, course7]
+        # Define the number of classes based on departments
+        self.number_of_classes = sum([len(x.courses) for x in self.depts])
 
-    # create departments
-    department1 = Department(name="MSC", courses=[course1, course3])
-    department2 = Department(name="MCA", courses=[course2, course4, course5])
-    department3 = Department(name="BSC", courses=[course6, course7])
+    def get_room_data(self):
+        num_rooms = int(input("Enter the number of rooms: "))
+        self.rooms = []
+        for i in range(num_rooms):
+            room_number = input("Enter room number: ")
+            seating_capacity = int(input("Enter seating capacity: "))
+            room = Room(number=room_number, seating_capacity=seating_capacity)
+            self.rooms.append(room)
 
-    self.depts = [department1, department2, department3]
+    def get_instructor_data(self):
+        num_instructors = int(input("Enter the number of instructors: "))
+        self.instructors = []
+        for i in range(num_instructors):
+            instructor_id = input("Enter instructor ID: ")
+            instructor_name = input("Enter instructor name: ")
+            instructor = Instructor(id=instructor_id, name=instructor_name)
+            self.instructors.append(instructor)
 
-    # define the number of classes
-    self.number_of_classes = sum([len(x.courses) for x in self.depts])
+    def get_course_data(self):
+        num_courses = int(input("Enter the number of courses: "))
+        self.courses = []
+        for i in range(num_courses):
+            course_number = input("Enter course number: ")
+            course_name = input("Enter course name: ")
+            max_students = int(input("Enter maximum number of students: "))
+            instructor_ids = []
+            num_instructors = int(
+                input("Enter the number of instructors for this course: ")
+            )
+            for j in range(num_instructors):
+                instructor_id = input("Enter instructor ID: ")
+                instructor_ids.append(instructor_id)
+            instructors = [
+                instructor for instructor in self.instructors if instructor.id in instructor_ids
+            ]
+            course = Course(
+                number=course_number,
+                name=course_name,
+                max_number_of_students=max_students,
+                instructors=instructors,
+            )
+            self.courses.append(course)
+
+    def get_department_data(self):
+        num_departments = int(input("Enter the number of departments: "))
+        self.depts = []
+        for i in range(num_departments):
+            dept_name = input("Enter department name: ")
+            course_numbers = []
+            num_courses = int(input("Enter the number of courses in this department: "))
+            for j in range(num_courses):
+                course_number = input("Enter course number: ")
+                course_numbers.append(course_number)
+            courses = [course for course in self.courses if course.number in course_numbers]
+            department = Department(name=dept_name, courses=courses)
+            self.depts.append(department)
+
+    def get_meeting_time_data(self):
+        num_meeting_times = int(input("Enter the number of meeting times: "))
+        for i in range(num_meeting_times):
+            meeting_time_id = input("Enter meeting time ID (optional): ")
+            meeting_time_str = input("Enter meeting time (e.g., MWF 09:00 - 10:00):")
+
+            # Create a MeetingTime object (assuming MeetingTime class definition)
+            meeting_time = MeetingTime(id=meeting_time_id, time=meeting_time_str)
+
+            self.meeting_times.append(meeting_time)  # Add MeetingTime object to the list
+
+            # Optionally, store the ID separately
+            if meeting_time_id:
+                self.meeting_time_ids.append(meeting_time_id)

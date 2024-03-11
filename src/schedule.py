@@ -30,20 +30,25 @@ class Schedule(object):
 
   def initialize(self):
     def _create_class(self, course, dept):
-      _class = Class(id=self.class_number, department=dept, course=course)
-      self.class_number += 1
+        _class = Class(id=self.class_number, department=dept, course=course)
+        self.class_number += 1
 
-      _class.meeting_time = deepcopy(self.data.meeting_times[int(len(self.data.meeting_times) * get_random_number())])
-      _class.room = deepcopy(self.data.rooms[int(len(self.data.rooms) * get_random_number())])
-      _class.instructor = deepcopy(self.data.instructors[int(len(self.data.instructors) * get_random_number())])
+        if self.data.meeting_times:  # Check if meeting_times is populated
+            _class.meeting_time = deepcopy(self.data.meeting_times[int(len(self.data.meeting_times) * get_random_number())])
+        else:
+            _class.meeting_time = None  # Assign None if no meeting times available
 
-      self._classes.append(_class)
+        _class.room = deepcopy(self.data.rooms[int(len(self.data.rooms) * get_random_number())])
+        _class.instructor = deepcopy(self.data.instructors[int(len(self.data.instructors) * get_random_number())])
+
+        self._classes.append(_class)
 
     for dept in self.data.depts:
-      for course in dept.courses:
-        _create_class(self, course, dept)
+        for course in dept.courses:
+            _create_class(self, course, dept)
 
     return self
+
 
   def calculate_fitness(self):
     number_of_conflicts = 0
